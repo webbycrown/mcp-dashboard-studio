@@ -1,0 +1,57 @@
+/**
+ * MCP Dashboard Studio - Alert & Message Styles
+ */
+
+.alert {
+    padding: 1rem;
+    border-radius: var(--card-radius);
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.alert-success {
+    background: var(--success-glow);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: var(--success);
+}
+
+.alert-error {
+    background: var(--danger-glow);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: var(--danger);
+}
+
+.alert-warning {
+    background: var(--warning-glow);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: var(--amber);
+}
+
+.alert-info {
+    background: var(--primary-bg);
+    border: 1px solid var(--primary-glow);
+    color: var(--primary-light);
+}
+
+.alert i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* ========================================================
+                       invite link
+======================================================== */
+.invite-copy-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.invite-copy-wrapper .invite-reveal-url {
+    flex: 1;
+    margin: 0;
+}

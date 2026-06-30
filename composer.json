@@ -1,0 +1,63 @@
+{
+    "name": "webbycrown/mcp-dashboard-studio",
+    "description": "A Laravel package that exposes your database as an MCP server — lets Claude, ChatGPT, Cursor, and Windsurf generate live analytics dashboards via OAuth 2.1 + PKCE.",
+    "keywords": [
+        "laravel",
+        "mcp",
+        "model-context-protocol",
+        "dashboard",
+        "oauth",
+        "ai",
+        "claude",
+        "chatgpt",
+        "cursor",
+        "passport",
+        "analytics"
+    ],
+    "homepage": "https://github.com/webbycrown/mcp-dashboard-studio",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Archi Patel",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0|^12.0|^13.0",
+        "laravel/mcp": ">=0.1",
+        "laravel/passport": ">=0.1"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.0",
+        "laravel/passport": "^13.0"
+    },
+    "suggest": {
+        "laravel/passport": "Required for OAuth 2.1 + PKCE authentication (^13.0). Run: php artisan install:api --passport"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webbycrown\\McpDashboardStudio\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webbycrown\\McpDashboardStudio\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webbycrown\\McpDashboardStudio\\Providers\\McpDashboardStudioServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

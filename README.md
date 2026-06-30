@@ -1,1 +1,628 @@
-# mcp-dashboard-studio
+
+# 🎨 MCP Dashboard Studio
+
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/webbycrown/mcp-dashboard-studio.svg?style=flat-square)](https://packagist.org/packages/webbycrown/mcp-dashboard-studio)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.2-blue)](https://www.php.net)
+[![Laravel](https://img.shields.io/badge/Laravel-11%2B%20%7C%2012%2B%20%7C%2013%2B-red)](https://laravel.com)
+[![Total Downloads](https://img.shields.io/packagist/dt/webbycrown/mcp-dashboard-studio.svg?style=flat-square)](https://packagist.org/packages/webbycrown/mcp-dashboard-studio)
+
+> 🚀 **Transform your Laravel database into AI-powered analytics dashboards**  
+> Expose your database as an **MCP (Model Context Protocol) server** and let AI assistants like **Claude, ChatGPT, Cursor, and Windsurf** generate live, interactive analytics dashboards from natural language — zero manual schema work required.
+
+---
+
+## ✨ Features
+
+- 🤖 **AI-Powered Generation** - Generate dashboards using natural language prompts
+- 🔒 **OAuth 2.1 + PKCE** - Secure authentication with RFC compliance (7591, 8414, 9728)
+- 📊 **Live Data Visualization** - Interactive charts, KPIs, and tables with real-time data
+- 🎨 **Glassmorphism UI** - Modern, responsive design with dark/light themes
+- 🔐 **Access Control** - Public/private dashboards with user management
+- 🛠️ **Manager UI** - Full CRUD, audit logs, and bulk operations
+- 🧪 **Comprehensive Testing** - Extensive test coverage for reliability
+- 🔌 **Extensible Architecture** - Customize via interfaces and configuration
+
+---
+
+## 📋 Requirements
+
+| Dependency | Version | Description |
+|------------|---------|-------------|
+| PHP | ≥ 8.2 | Core language |
+| Laravel | ≥ 11.x | Framework (11, 12, or 13) |
+| laravel/passport | ≥ 13.x | OAuth 2.1 server |
+| laravel/mcp | ≥ 0.1 | MCP protocol implementation |
+
+---
+
+## 📦 Installation
+
+### Step 1: Register Repository
+
+Add to your host app `composer.json`:
+
+```json
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/webbycrown/mcp-dashboard-studio"
+    }
+]
+```
+
+### Step 2: Install Package
+
+```bash
+composer require webbycrown/mcp-dashboard-studio:dev-main
+```
+
+### Step 3: Install Laravel Passport
+
+```bash
+php artisan install:api --passport
+php artisan passport:client
+```
+
+### Step 4: Update User Model
+
+```php
+use Laravel\Passport\HasApiTokens;
+
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable;
+}
+```
+
+### Step 5: Add API Guard
+
+```php
+// config/auth.php
+'guards' => [
+    'web' => ['driver' => 'session', 'provider' => 'users'],
+    'api' => ['driver' => 'passport', 'provider' => 'users'],
+],
+```
+
+### Step 6: Trust Proxy Headers
+
+Required for ngrok, Nginx, or Cloudflare:
+
+```php
+// bootstrap/app.php
+->withMiddleware(function (Middleware $middleware): void {
+    $middleware->trustProxies(at: '*');
+})
+```
+
+### Step 7: Publish Assets (Optional)
+
+```bash
+php artisan vendor:publish --tag=mcp-dashboard-studio-config
+php artisan vendor:publish --tag=mcp-dashboard-studio-assets
+php artisan vendor:publish --tag=mcp-dashboard-studio-migrations
+php artisan vendor:publish --tag=mcp-dashboard-studio-views
+```
+
+### Step 8: migrate tables
+
+```
+php artisan migrate
+```
+
+### Step 9: Set Environment Variables
+
+```ini
+APP_URL=https://your-public-domain.com
+MCP_DATA_MODE=database
+MCP_DB_ENABLED=true
+MCP_DB_CONNECTION=mysql
+MCP_OAUTH_ENABLED=true
+MCP_OAUTH_LOGIN_ROUTES=true
+MCP_REQUIRE_ADMIN_CONSENT=false
+```
+
+### Step 10: Connect Your AI Tool (e.g., ChatGPT)
+
+You have two ways to connect your AI client to your live server:
+
+#### Method A: Static API Key (Recommended & Easiest)
+This method bypasses OAuth and works even if your server blocks hidden directories.
+1. Set a secure `MCP_SECRET_TOKEN` in your `.env` (e.g., `MCP_SECRET_TOKEN=my_secure_key_123`).
+2. Run `php artisan config:clear`.
+3. In ChatGPT's "Add App" or "Connectors" setup, set **Authentication** to **API Key**.
+4. Set **Auth Type** to **Bearer**.
+5. Paste your `MCP_SECRET_TOKEN` into the API Key box.
+
+#### Method B: Full OAuth (Requires Login Popup)
+If you want to use standard OAuth, you must generate a real Client ID and Secret:
+1. Run `php artisan passport:client`.
+2. Name it "ChatGPT" and provide the Callback URL shown in the ChatGPT UI.
+3. In ChatGPT, select **OAuth** for Authentication.
+4. If your server supports auto-discovery, it will connect automatically. If auto-discovery fails (e.g., Nginx blocks `.well-known`), enter the endpoints manually:
+   - **Authorization URL:** `https://your-domain.com/oauth/authorize`
+   - **Token URL:** `https://your-domain.com/oauth/token`
+5. Paste the **Client ID** and **Client Secret** generated by Passport into the ChatGPT UI. *(Do NOT use your MCP_SECRET_TOKEN here).*
+
+### Step 11: Set ai models to use this mcp API
+
+Configure config/mcp-dashboard-studio.php
+
+```
+allowed_redirect_domains' => [
+    'claude.ai',
+    'chatgpt.com',
+    'cursor.com'
+]
+```
+
+### Step 12: Configure instruction
+
+Configure some instructions about the site and database like domain,relationships etc.so any AI tool easily understand your site and db structure.
+
+---
+
+## ⚙️ Configuration
+
+### Optional Environment Variables
+
+```ini
+# Core
+MCP_ENABLED=true
+MCP_MANAGER_ENABLED=true
+MCP_MANAGER_REQUIRE_ADMIN=false
+MCP_MANAGER_PREFIX=mcp-manager
+
+# OAuth
+MCP_REQUIRE_ADMIN_CONSENT=false
+MCP_TOKEN_TTL_DAYS=30
+MCP_REFRESH_TOKEN_TTL_DAYS=90
+
+# Routes
+MCP_ROUTE_PREFIX=
+MCP_DASHBOARD_PREFIX=dashboard-studio
+MCP_PATH=mcp/generate-dashboard
+
+# Database
+MCP_DATA_MODE=schema
+MCP_DB_ENABLED=false
+MCP_MAX_TABLES=100
+MCP_MAX_COLUMNS=8
+MCP_MAX_QUERY_LIMIT=100
+
+# Logging
+MCP_LOGGING_ENABLED=false
+```
+
+---
+
+## 🏗️ Architecture
+
+### Dashboard Generation Pipeline
+
+```
+User Prompt
+    ↓
+Enhanced Prompt Analyzer
+    ↓
+Dashboard Planner (Explicit Plan)
+    ↓
+Dashboard Spec Builder
+    ↓
+Data Source Resolver (Live DB Hydration)
+    ↓
+Dashboard Validator
+    ↓
+Layout Engine
+    ↓
+HTML Renderer
+    ↓
+Interactive Dashboard
+```
+
+### Key Components
+
+- **DashboardPlanner** - Creates explicit plans before construction
+- **DashboardGenerator** - Orchestrates the entire pipeline
+- **DatabaseProvider** - Handles SQL generation with driver support
+- **ComponentGenerators** - KPI, Chart, Table, Filter generators
+- **MCP Tools** - 6 tools for different generation scenarios
+
+---
+
+## 🎨 CSS Customization
+
+### Publishing Assets
+
+To customize the package CSS, publish the assets:
+
+```bash
+php artisan vendor:publish --tag=mcp-dashboard-studio-assets
+```
+
+This copies files to:
+
+```
+public/mcp-dashboard-studio/assets/
+├── css/
+│   ├── style.css          # Main dashboard styles
+│   ├── alerts.css         # Alert component styles
+│   ├── bulk-actions.css   # Bulk action styles
+│   └── manager.css        # Manager UI styles
+└── js/
+    └── app.js             # JavaScript functionality
+```
+
+### View Customization
+
+Publish views to override templates:
+
+```bash
+php artisan vendor:publish --tag=mcp-dashboard-studio-views
+```
+
+Views are published to:
+
+```
+resources/views/vendor/mcp-dashboard-studio/
+```
+
+---
+
+## 🛡️ Security
+
+### OAuth 2.1 + PKCE Flow
+
+The package implements full OAuth 2.1 with PKCE:
+
+- **RFC 7591** - Dynamic client registration
+- **RFC 8414** - OAuth server metadata
+- **RFC 9728** - Protected resource metadata
+
+### Security Features
+
+| Feature | Description |
+|---------|-------------|
+| 🔐 **Token Validation** | OAuth Bearer + Static token support |
+| 🛡️ **SQL Injection Protection** | Parameterized queries with limits |
+| 🚫 **Domain Allowlist** | Restrict OAuth client registration |
+| ⏱️ **Rate Limiting** | 10 registrations/minute on `/oauth/register` |
+| 🔒 **HTTPS Enforcement** | Rejects HTTP in production |
+| 👤 **Access Control** | Public/private dashboard permissions |
+| 📝 **Audit Logging** | Track all dashboard operations |
+
+### Best Practices
+
+1. **Always use HTTPS** in production
+2. **Set strong `MCP_SECRET_TOKEN`** for non-OAuth clients
+3. **Configure domain allowlist** for OAuth registration
+4. **Enable admin consent** for sensitive environments
+5. **Regularly review audit logs** in manager UI
+6. **Keep dependencies updated** for security patches
+
+---
+
+## 💾 Database Requirements
+
+### Supported Databases
+
+- ✅ MySQL / MariaDB
+- ✅ PostgreSQL
+- ✅ SQLite
+
+### Performance Considerations
+
+- **Query Limits**: Configurable via `MCP_MAX_QUERY_LIMIT` (default: 100 rows)
+- **Table Discovery**: Limited to `MCP_MAX_TABLES` (default: 100)
+- **Column Limits**: Maximum `MCP_MAX_COLUMNS` per table (default: 8)
+- **Caching**: Schema caching with TTL (default: 3600 seconds)
+
+### Large Dataset Handling
+
+For databases with millions of rows:
+
+1. Enable schema mode: `MCP_DATA_MODE=schema`
+2. Increase query limits cautiously
+3. Use database indexes on frequently queried columns
+4. Consider read replicas for dashboard queries
+
+---
+
+## ⚠️ Limitations
+
+| Limitation | Default | Configurable |
+|------------|---------|--------------|
+| Tables discovered | 100 | `MCP_MAX_TABLES` |
+| Columns per table | 8 | `MCP_MAX_COLUMNS` |
+| Query result rows | 100 | `MCP_MAX_QUERY_LIMIT` |
+| Token TTL | 30 days | `MCP_TOKEN_TTL_DAYS` |
+| Refresh token TTL | 90 days | `MCP_REFRESH_TOKEN_TTL_DAYS` |
+
+### Known Constraints
+
+- Complex JOIN queries require manual configuration
+- Custom SQL queries not supported (use views instead)
+- Real-time streaming not available (AJAX polling only)
+- Multi-tenant databases need connection configuration
+
+---
+
+## 📊 Examples & Use Cases
+
+### Sales Dashboard
+
+**Prompt:**
+> "Show me sales overview with revenue by month, top 10 products, and regional breakdown"
+
+**Result:**
+
+- 📈 Line chart: Monthly revenue trend
+- 🏆 Bar chart: Top 10 products by sales
+- 🗺️ Pie chart: Regional distribution
+- 📋 Data table: Recent transactions
+
+### HR Analytics
+
+**Prompt:**
+> "Create HR dashboard showing employee count by department, hiring trends, and turnover rate"
+
+**Result:**
+
+- 👥 KPI cards: Total employees, new hires, turnover
+- 📊 Bar chart: Employees by department
+- 📈 Line chart: Hiring trends over time
+- 📉 Gauge: Turnover rate
+
+### Inventory Management
+
+**Prompt:**
+> "Build inventory dashboard with stock levels, low stock alerts, and category breakdown"
+
+**Result:**
+
+- 📦 KPI cards: Total items, low stock count, total value
+- 🚨 Alert cards: Low stock warnings
+- 📊 Pie chart: Inventory by category
+- 📋 Table: Stock levels with filters
+
+---
+
+## 🌐 Deployment
+
+### Production Checklist
+
+- [ ] Set `APP_URL` to public domain
+- [ ] Configure HTTPS with valid SSL certificate
+- [ ] Set strong `MCP_SECRET_TOKEN`
+- [ ] Configure OAuth domain allowlist
+- [ ] Enable rate limiting
+- [ ] Set appropriate token TTL values
+- [ ] Configure database connection for production
+- [ ] Enable audit logging
+- [ ] Test OAuth flow with AI tools
+- [ ] Review and restrict table access
+
+### Scaling Considerations
+
+- **Database**: Use read replicas for dashboard queries
+- **Caching**: Enable Redis for session and schema cache
+- **Load Balancing**: Ensure sticky sessions for OAuth flow
+- **CDN**: Serve published assets via CDN
+- **Monitoring**: Track dashboard generation performance
+
+---
+
+## 🧪 Testing
+
+### Run Tests
+
+```bash
+cd vendor/webbycrown/mcp-dashboard-studio
+vendor/bin/phpunit
+```
+
+### Test Coverage
+
+The package includes comprehensive tests:
+
+- ✅ **OAuth Flow** - Dynamic registration, discovery, login
+- ✅ **Dashboard Generation** - Pipeline, planner, generator
+- ✅ **Database Provider** - SQL generation, aggregates, charts
+- ✅ **MCP Tools** - Tool validation and execution
+- ✅ **Security** - SQL injection, unauthorized access
+
+### Test Files
+
+- `DynamicClientRegistrationTest.php` - RFC 7591 compliance
+- `OAuthDiscoveryTest.php` - RFC 8414/9728 compliance
+- `OAuthLoginTest.php` - Login flow validation
+- `VerifyMcpTokenTest.php` - Token validation
+- `DashboardPlannerTest.php` - Planning phase
+- `DashboardGeneratorTest.php` - Generation pipeline
+- `DatabaseProviderTest.php` - SQL generation
+- `McpDashboardToolTest.php` - MCP tool execution
+- `SecurityTest.php` - Security vulnerabilities
+
+---
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+#### OAuth Warning in Logs
+
+**Problem:** `[MCP] OAuth 2.1 is DISABLED: Laravel Passport is not installed`
+
+**Solution:**
+
+```bash
+composer require laravel/passport
+php artisan migrate
+php artisan passport:install --uuids
+php artisan passport:keys
+```
+
+#### Invalid Client Error
+
+**Problem:** `{"error":"invalid_client","error_description":"Client authentication failed"}` when returning from the login screen.
+
+**Solution:** You likely put your `MCP_SECRET_TOKEN` into the "OAuth Client Secret" box in the AI tool. The `MCP_SECRET_TOKEN` is only for API Key authentication. For OAuth, you must generate a real client secret using `php artisan passport:client --confidential` and use that instead.
+
+#### Nginx 404 on OAuth Discovery
+
+**Problem:** ChatGPT reports `does not implement OAuth` or returns a 404 for `/.well-known/oauth-authorization-server`.
+
+**Solution:** Your Nginx server is blocking access to hidden directories (directories starting with a dot). Update your Nginx configuration to allow the `.well-known` directory:
+```nginx
+location ~ /\.(?!well-known).* {
+    deny all;
+}
+```
+Alternatively, bypass OAuth discovery by entering the Auth/Token URLs manually in the AI client, or use the API Key method instead.
+
+#### Session Store Not Set
+
+**Problem:** `Session store not set on request`
+
+**Solution:** Ensure package is updated (fixed in latest version)
+
+#### Dashboard Shows No Data
+
+**Problem:** Dashboard renders but shows empty data
+
+**Solution:** Set `MCP_DB_ENABLED=true` and `MCP_DATA_MODE=database`
+
+#### Manager Returns 503
+
+**Problem:** Manager UI unavailable
+
+**Solution:** Set `MCP_MANAGER_ENABLED=true` in `.env`
+
+#### Assets Missing
+
+**Problem:** CSS/JS not loading
+
+**Solution:** Publish assets:
+
+```bash
+php artisan vendor:publish --tag=mcp-dashboard-studio-assets
+```
+
+### Debug Mode
+
+Enable verbose logging:
+
+```ini
+MCP_LOGGING_ENABLED=true
+```
+
+Check logs at:
+
+```bash
+tail -f storage/logs/laravel.log
+```
+
+---
+
+## ❓ FAQ
+
+### Q: Can I use this without OAuth?
+
+**A:** Yes! Set `MCP_OAUTH_ENABLED=false` and use `MCP_SECRET_TOKEN` for authentication.
+
+### Q: Does this work with any database?
+
+**A:** It supports MySQL, PostgreSQL, and SQLite. Other databases may work but aren't officially tested.
+
+### Q: Can I customize the dashboard design?
+
+**A:** Yes! Publish the assets and views, then modify CSS and Blade templates to match your brand.
+
+### Q: Is my data secure?
+
+**A:** The package uses parameterized queries, access controls, and OAuth 2.1. However, always review your security settings and follow best practices.
+
+### Q: Can I limit which tables AI can access?
+
+**A:** Yes! Configure excluded or whitelisted tables in `config/mcp-dashboard-studio.php`.
+
+### Q: How do I add custom authentication?
+
+**A:** Implement the `NlpClientInterface` and bind it in a service provider.
+
+### Q: Can I use this in multi-tenant applications?
+
+**A:** Yes, but you'll need to configure database connections per tenant.
+
+---
+
+## 📚 Documentation
+
+- **[DOCUMENTATION.md](DOCUMENTATION.md)** - Full technical reference (architecture, pipeline, security, config)
+- **[CHANGELOG.md](CHANGELOG.md)** - Release history and version notes
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Write** tests for your changes
+4. **Ensure** all tests pass (`vendor/bin/phpunit`)
+5. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+6. **Push** to the branch (`git push origin feature/amazing-feature`)
+7. **Open** a Pull Request
+
+### Development Setup
+
+```bash
+git clone https://github.com/webbycrown/mcp-dashboard-studio.git
+cd mcp-dashboard-studio
+composer install
+cp .env.example .env
+php artisan key:generate
+vendor/bin/phpunit
+```
+
+### Code Style
+
+- Follow PSR-12 coding standards
+- Add tests for new features
+- Update documentation as needed
+- Keep commits clear and focused
+
+---
+
+## 📄 License
+
+MIT © [Archi Patel](https://github.com/webbycrown)
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with [Laravel](https://laravel.com)
+- OAuth implementation via [Laravel Passport](https://laravel.com/docs/passport)
+- MCP protocol by [Anthropic](https://www.anthropic.com)
+- Charts powered by [Chart.js](https://www.chartjs.org)
+
+---
+
+## 📞 Support
+
+- 📖 [Documentation](DOCUMENTATION.md)
+- 🐛 [Issue Tracker](https://github.com/webbycrown/mcp-dashboard-studio/issues)
+- 💬 [Discussions](https://github.com/webbycrown/mcp-dashboard-studio/discussions)
+
+---
+
+<div align="center">
+
+**⭐ If you find this package helpful, please consider giving it a star on GitHub!**
+
+Made with ❤️ by [Archi Patel](https://github.com/webbycrown)
+
+</div>
