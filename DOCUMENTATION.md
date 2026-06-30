@@ -638,4 +638,4 @@ Uses Orchestra Testbench with SQLite `:memory:`.
 
 ## License
 
-MIT © [Archi Patel](https://github.com/webbycrown)
+MIT © [Webbycrown](https://github.com/webbycrown)

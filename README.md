@@ -598,7 +598,7 @@ vendor/bin/phpunit
 
 ## 📄 License
 
-MIT © [Archi Patel](https://github.com/webbycrown)
+MIT © [Webbycrown](https://github.com/webbycrown)
 
 ---
 
@@ -623,6 +623,6 @@ MIT © [Archi Patel](https://github.com/webbycrown)
 
 **⭐ If you find this package helpful, please consider giving it a star on GitHub!**
 
-Made with ❤️ by [Archi Patel](https://github.com/webbycrown)
+Made with ❤️ by [Webbycrown](https://github.com/webbycrown)
 
 </div>
