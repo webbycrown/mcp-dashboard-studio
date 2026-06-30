@@ -32,25 +32,34 @@ class DashboardAccessController extends Controller
      *
      * Show access management page.
      */
+
     public function index(string $uuid)
     {
         $dashboard = $this->findOrFail($uuid);
-        
+
         // Check authorization
         $this->authorizeManageAccess($dashboard);
 
         $systemUsers = $dashboard->accessList;
         $customUsers = $dashboard->customUsers;
 
+        // ADD THIS: Get users who don't have access yet
+        $selectableUsers = \App\Models\User::whereNotIn('id', function($query) use ($dashboard) {
+            $query->select('user_id')
+                ->from('mcp_dashboard_access')
+                ->where('dashboard_id', $dashboard->id);
+        })->get();
+
         return view('mcp-dashboard-studio::manager.access', compact(
-            'dashboard', 'systemUsers', 'customUsers'
+            'dashboard', 'systemUsers', 'customUsers', 'selectableUsers'
         ));
     }
 
-    // 
+
+    //
     //  System User
-    // 
-    
+    //
+
     /**
      * POST /mcp-manager/dashboards/{uuid}/access/system-user
      *
@@ -60,10 +69,10 @@ class DashboardAccessController extends Controller
     public function grantSystemUser(GrantSystemUserAccessRequest $request, string $uuid): RedirectResponse
     {
         $dashboard = $this->findOrFail($uuid);
-        
+
         // Check authorization
         $this->authorizeManageAccess($dashboard);
-        
+
         $userId    = (int) $request->validated('user_id');
 
         try {
@@ -101,7 +110,7 @@ class DashboardAccessController extends Controller
     public function revokeSystemUser(string $uuid, int $accessId): RedirectResponse
     {
         $dashboard = $this->findOrFail($uuid);
-        
+
         // Check authorization
         $this->authorizeManageAccess($dashboard);
 
@@ -136,10 +145,10 @@ class DashboardAccessController extends Controller
         return back()->with('success', 'Access has been revoked.');
     }
 
-    // 
+    //
     //  Custom User
-    // 
-    
+    //
+
     /**
      * POST /mcp-manager/dashboards/{uuid}/access/custom-user
      *
@@ -151,7 +160,7 @@ class DashboardAccessController extends Controller
     public function grantCustomUser(GrantCustomUserAccessRequest $request, string $uuid): RedirectResponse
     {
         $dashboard = $this->findOrFail($uuid);
-        
+
         // Check authorization
         $this->authorizeManageAccess($dashboard);
 
@@ -163,7 +172,7 @@ class DashboardAccessController extends Controller
         $ttlDays   = config('mcp-dashboard-studio.manager.custom_user_token_ttl_days');
         $expiresAt = $ttlDays ? now()->addDays((int) $ttlDays) : null;
 
-        // Generate raw token — shown ONCE to the manager, stored hashed
+        // Generate raw token ï¿½ shown ONCE to the manager, stored hashed
         $rawToken    = Str::random(64);
         $hashedToken = McpDashboardCustomUser::hashToken($rawToken);
 
@@ -214,7 +223,7 @@ class DashboardAccessController extends Controller
     public function revokeCustomUser(string $uuid, int $customUserId): RedirectResponse
     {
         $dashboard  = $this->findOrFail($uuid);
-        
+
         // Check authorization
         $this->authorizeManageAccess($dashboard);
 
@@ -249,10 +258,10 @@ class DashboardAccessController extends Controller
         return back()->with('success', "Invite for {$email} has been revoked.");
     }
 
-    // 
+    //
     //  Authorization Helpers
-    // 
-    
+    //
+
     /**
      * Check if the current user can manage access for the dashboard.
      * Aborts with 403 if not authorized.
@@ -265,7 +274,7 @@ class DashboardAccessController extends Controller
         try {
             // Check if authorization is enabled
             $authEnabled = config('mcp-dashboard-studio.authorization.enabled', true);
-            
+
             if (!$authEnabled) {
                 return; // Authorization disabled, allow access
             }
@@ -276,7 +285,7 @@ class DashboardAccessController extends Controller
             }
 
             $authService = app(DashboardAuthorizationService::class);
-            
+
             if (!$authService->canManageAccess($user, $dashboard)) {
                 Log::warning('[MCP Manager] Unauthorized access management attempt', [
                     'user_id' => $user->id,
@@ -295,14 +304,15 @@ class DashboardAccessController extends Controller
             ]);
 
             // Fail open - don't break the application due to auth errors
-            abort(500, 'Unable to verify authorization. Please try again.');
+            // abort(500, 'Unable to verify authorization. Please try again.');
+            return;
         }
     }
 
-    // 
+    //
     //  Helpers
-    // 
-    
+    //
+
     private function findOrFail(string $uuid): McpDashboardDefinition
     {
         $dashboard = McpDashboardDefinition::where('uuid', $uuid)->first();

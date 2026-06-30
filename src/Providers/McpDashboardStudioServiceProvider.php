@@ -40,19 +40,18 @@ class McpDashboardStudioServiceProvider extends ServiceProvider
             return;
         }
 
-        //  Routes 
+        //  Routes
         $this->loadRoutesFrom(__DIR__ . '/../Routes/ai.php');
         $this->loadRoutesFrom(__DIR__ . '/../Routes/web.php');
 
-        //  Middleware Aliases 
+        //  Middleware Aliases
         // Allows views/routes to reference these by short alias if needed.
         $this->app['router']->aliasMiddleware('mcp.dashboard.access', CheckDashboardAccess::class);
         $this->app['router']->aliasMiddleware('mcp.manager.access', RequireManagerAccess::class);
 
-        //  Database 
+        //  Database
         try {
             $this->loadMigrationsFrom(__DIR__ . '/../Database/migrations');
-            Log::debug('[MCP] Migrations loaded successfully from package');
         } catch (\Throwable $e) {
             Log::error('[MCP] Failed to load migrations', [
                 'error' => $e->getMessage(),
@@ -61,33 +60,33 @@ class McpDashboardStudioServiceProvider extends ServiceProvider
             ]);
         }
 
-        //  Passport OAuth Views 
+        //  Passport OAuth Views
         // Set Passport's authorize/login views to use our package views,
         // but only if Passport is installed and OAuth is enabled.
         $this->bootPassportViews();
 
-        //  Register Passport OAuth Scopes 
+        //  Register Passport OAuth Scopes
         $this->bootPassportScopes();
 
-        //  Token Lifetime (Security: Risk 4) 
+        //  Token Lifetime (Security: Risk 4)
         $this->bootPassportTokenTtl();
 
-        //  Developer Warning: Passport Missing 
+        //  Developer Warning: Passport Missing
         $this->warnIfPassportMissing();
 
-        //  Views 
+        //  Views
         // Load package views under namespace 'mcp-dashboard-studio'
         // Host apps can override by publishing views to resources/views/vendor/mcp-dashboard-studio/
         $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'mcp-dashboard-studio');
 
-        //  Publishable Assets 
+        //  Publishable Assets
         $this->registerPublishables();
     }
 
-    // 
+    //
     //  Passport OAuth Integration
-    // 
-    
+    //
+
     /**
      * Configure Passport to use our custom authorization view.
      *
@@ -158,7 +157,7 @@ class McpDashboardStudioServiceProvider extends ServiceProvider
      *   mcp-dashboard-studio.oauth.refresh_token_ttl_days (default 90)
      *
      * Only runs when Passport is installed and OAuth is enabled.
-     * Wrapped in try/catch — if a future Passport version changes the API,
+     * Wrapped in try/catch ï¿½ if a future Passport version changes the API,
      * this fails gracefully with a log message instead of crashing the app.
      */
     protected function bootPassportTokenTtl(): void
@@ -196,15 +195,15 @@ class McpDashboardStudioServiceProvider extends ServiceProvider
         }
     }
 
-    // 
+    //
     //  Developer Warnings
-    // 
-    
+    //
+
     /**
      * Warn when OAuth is enabled in config but Passport is not installed.
      *
      * Logged only once per boot at WARNING level.
-     * The package continues to work — MCP tools work with MCP_SECRET_TOKEN.
+     * The package continues to work ï¿½ MCP tools work with MCP_SECRET_TOKEN.
      */
     protected function warnIfPassportMissing(): void
     {
@@ -232,10 +231,10 @@ class McpDashboardStudioServiceProvider extends ServiceProvider
         );
     }
 
-    // 
+    //
     //  Tools Registration
-    // 
-    
+    //
+
     protected function registerTools(): void
     {
         $this->app->singleton('mcp.dashboard.tool', function () {
@@ -263,10 +262,10 @@ class McpDashboardStudioServiceProvider extends ServiceProvider
         });
     }
 
-    // 
+    //
     //  Publishable Assets
-    // 
-    
+    //
+
     protected function registerPublishables(): void
     {
         $this->publishes([

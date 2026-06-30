@@ -1,3 +1,4 @@
+<?php
 namespace Webbycrown\McpDashboardStudio\Http\Controllers;
 
 use Illuminate\Support\Facades\File;
@@ -11,7 +12,7 @@ class RenderCssController extends Controller
         try {
             // Priority 1: Check if assets are published to host project
             $publishedPath = public_path('mcp-dashboard-studio/assets/css/style.css');
-            
+
             if (File::exists($publishedPath)) {
                 Log::debug('[MCP] Using published CSS assets from host project', ['path' => $publishedPath]);
                 return response(File::get($publishedPath), 200, [
@@ -21,7 +22,7 @@ class RenderCssController extends Controller
 
             // Priority 2: Fallback to package assets
             $packagePath = __DIR__ . '/../../Resources/assets/css/style.css';
-            
+
             if (File::exists($packagePath)) {
                 Log::debug('[MCP] Using fallback CSS assets from package', ['path' => $packagePath]);
                 return response(File::get($packagePath), 200, [
@@ -34,7 +35,7 @@ class RenderCssController extends Controller
                 'published_path' => $publishedPath,
                 'package_path' => $packagePath,
             ]);
-            
+
             abort(404, 'CSS assets not found. Please run: php artisan vendor:publish --tag=mcp-dashboard-studio-assets');
 
         } catch (\Throwable $e) {
@@ -43,7 +44,7 @@ class RenderCssController extends Controller
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ]);
-            
+
             abort(500, 'Failed to load CSS assets. Check logs for details.');
         }
     }

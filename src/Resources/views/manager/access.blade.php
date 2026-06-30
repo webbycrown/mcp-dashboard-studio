@@ -76,10 +76,10 @@
         <div class="mgr-card">
             <div class="mgr-card-header">
                 <span class="mgr-card-title"><i class="bi bi-person-check me-2"></i>System Users</span>
-                <span class="count-badge">{{ $systemAccess->count() }}</span>
+                <span class="count-badge">{{ $systemUsers->count() }}</span>
             </div>
 
-            @if ($systemAccess->isNotEmpty())
+            @if ($systemUsers->isNotEmpty())
                 <div class="access-table-wrap">
                     <table class="access-table">
                         <thead>
@@ -89,7 +89,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($systemAccess as $access)
+                            @foreach ($systemUsers as $access)
                                 <tr>
                                     <td>
                                         @if ($access->user)

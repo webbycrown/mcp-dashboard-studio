@@ -23,9 +23,9 @@ return [
     |                  Key = scope identifier, Value = human-readable description.
     */
     'oauth' => [
-        'enabled'      => env('MCP_OAUTH_ENABLED', true),
+        'enabled' => env('MCP_OAUTH_ENABLED', true),
         'login_routes' => env('MCP_OAUTH_LOGIN_ROUTES', true),
-        'scopes'       => [
+        'scopes' => [
             'mcp-access' => 'Access MCP Dashboard API',
         ],
 
@@ -68,7 +68,7 @@ return [
         | Defaults: 30 days access / 90 days refresh.
         | Passport's built-in default is 1 year — reducing this is recommended.
         */
-        'token_ttl_days'         => env('MCP_TOKEN_TTL_DAYS', 30),
+        'token_ttl_days' => env('MCP_TOKEN_TTL_DAYS', 30),
         'refresh_token_ttl_days' => env('MCP_REFRESH_TOKEN_TTL_DAYS', 90),
     ],
 
@@ -117,9 +117,9 @@ return [
     */
     'routes' => [
         'dashboard' => env('MCP_DASHBOARD_PREFIX', 'dashboard-studio'),
-        'mcp'       => env('MCP_PATH', 'mcp/generate-dashboard'),
-        'api'       => env('MCP_API_PREFIX', 'api'),
-        'render'    => env('MCP_RENDER_PREFIX', 'dashboard'),
+        'mcp' => env('MCP_PATH', 'mcp/generate-dashboard'),
+        'api' => env('MCP_API_PREFIX', 'api'),
+        'render' => env('MCP_RENDER_PREFIX', 'dashboard'),
     ],
 
     /*
@@ -137,13 +137,13 @@ return [
     |--------------------------------------------------------------------------
     */
     'database' => [
-        'enabled'    => env('MCP_DB_ENABLED', false),
+        'enabled' => env('MCP_DB_ENABLED', false),
         'connection' => env('MCP_DB_CONNECTION', null),
 
         'discovery' => [
-            'max_tables'      => env('MCP_MAX_TABLES', 100),
-            'max_columns'     => env('MCP_MAX_COLUMNS', 8),
-            'sample_rows'     => env('MCP_LIMIT', 10),
+            'max_tables' => env('MCP_MAX_TABLES', 100),
+            'max_columns' => env('MCP_MAX_COLUMNS', 8),
+            'sample_rows' => env('MCP_LIMIT', 10),
             'max_query_limit' => env('MCP_MAX_QUERY_LIMIT', 100),
             'excluded_tables' => [
                 'users',
@@ -155,6 +155,9 @@ return [
                 'jobs',
                 'migrations',
                 'mcp_dashboard_definitions',
+                'mcp_dashboard_access',
+                'mcp_dashboard_audit_logs',
+                'mcp_dashboard_custom_users',
                 'oauth_access_tokens',
                 'oauth_auth_codes',
                 'oauth_clients',
@@ -165,7 +168,7 @@ return [
         ],
 
         'schema' => [
-            'cache_ttl'    => env('MCP_CACHE_TTL', 3600),
+            'cache_ttl' => env('MCP_CACHE_TTL', 3600),
             'cache_prefix' => env('MCP_CACHE_PREFIX', 'mcp_schema'),
         ],
     ],
@@ -186,7 +189,7 @@ return [
     | Instructions sent to the AI model during the MCP initialization handshake.
     | Set to null to use the built-in defaults.
     */
-    'instructions' => "## YOUR CAPABILITIES
+    'instructions' => '## YOUR CAPABILITIES
                         - You have tools that automatically discover ALL database tables, columns, and relationships.
                         - Every tool performs live schema introspection — no manual schema input is needed.
                         - All KPI values, chart datasets, and table rows come from REAL database queries.
@@ -205,7 +208,7 @@ return [
                         Do NOT rebuild the dashboard as HTML/CSS/JS — the live_url renders a professional interactive dashboard.
 
                         ### 4. NEVER generate mock or placeholder data
-                        All values returned by the tools are real. Report 0 or empty values honestly.",
+                        All values returned by the tools are real. Report 0 or empty values honestly.',
 
     /*
     |--------------------------------------------------------------------------
@@ -215,6 +218,9 @@ return [
     'schema_analysis' => [
         'framework_tables' => [
             'mcp_dashboard_definitions',
+            'mcp_dashboard_access',
+            'mcp_dashboard_audit_logs',
+            'mcp_dashboard_custom_users',
         ],
     ],
 
@@ -224,13 +230,13 @@ return [
     |--------------------------------------------------------------------------
     */
     'tools' => [
-        'dashboard-tool'          => true,
+        'dashboard-tool' => true,
         'dashboard-analysis-tool' => true,
-        'dashboard-spec-tool'     => true,
-        'dashboard-html-tool'     => true,
-        'dashboard-export-tool'   => true,
-        'database-query-tool'     => true,
-        'dashboard-blade-create'  => true,
+        'dashboard-spec-tool' => true,
+        'dashboard-html-tool' => true,
+        'dashboard-export-tool' => true,
+        'database-query-tool' => true,
+        'dashboard-blade-create' => true,
     ],
 
     /*
@@ -248,14 +254,11 @@ return [
     | 'custom_user_token_ttl_days' — null = never expires, integer = days.
     */
     'manager' => [
-        'enabled'                  => env('MCP_MANAGER_ENABLED', true),
-        'require_admin'            => env('MCP_MANAGER_REQUIRE_ADMIN', false),
-        'prefix'                   => env('MCP_MANAGER_PREFIX', 'mcp-manager'),
-        'per_page'                 => env('MCP_MANAGER_PER_PAGE', 10),
+        'enabled' => env('MCP_MANAGER_ENABLED', true),
+        'require_admin' => env('MCP_MANAGER_REQUIRE_ADMIN', false),
+        'prefix' => env('MCP_MANAGER_PREFIX', 'mcp-manager'),
+        'per_page' => env('MCP_MANAGER_PER_PAGE', 10),
         'custom_user_token_ttl_days' => env('MCP_CUSTOM_USER_TOKEN_TTL_DAYS', 30),
     ],
 
-
-
 ];
-
